@@ -11,10 +11,14 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
     private int m_Points;
+    private string playerName;
+    private int bestScore;
+    private string bestPlayer;
     
     private bool m_GameOver = false;
 
@@ -24,6 +28,11 @@ public class MainManager : MonoBehaviour
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
+        playerName = DataManager.Instance.playerName;
+        bestPlayer = DataManager.Instance.bestPlayer;
+        bestScore = DataManager.Instance.bestScore;
+        BestScore(bestScore,bestPlayer);
+        AddPoint(0);
         
         int[] pointCountArray = new [] {1,1,2,2,5,5};
         for (int i = 0; i < LineCount; ++i)
@@ -55,6 +64,14 @@ public class MainManager : MonoBehaviour
         }
         else if (m_GameOver)
         {
+            if (m_Points > bestScore)
+            {
+                DataManager.Instance.bestScore = m_Points;
+                DataManager.Instance.bestPlayer = playerName;
+                bestScore = m_Points;
+                bestPlayer = playerName;
+                BestScore(bestScore,bestPlayer);
+            }
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -65,12 +82,23 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"Score : {m_Points} {playerName}";
+    }
+
+    void BestScore(int bestScore, string bestPlayer)
+    {
+        BestScoreText.text = $"Best Score : {bestPlayer} : {bestScore}";
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+
+    public void Back()
+    {
+        DataManager.Instance.SaveBestScore();
+        SceneManager.LoadScene(0);
     }
 }
